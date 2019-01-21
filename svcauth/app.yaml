@@ -1,0 +1,55 @@
+runtime: go111
+instance_class: B1
+service: auth
+basic_scaling:
+  max_instances: 2
+  idle_timeout: 10m
+
+handlers:
+- url: /.*
+  script: auto
+  secure: always
+  redirect_http_response_code: 301
+
+env_variables:
+  LBAUTH_GCP_PROJECT: '{{GoogleCloudProjectName}}'
+  LBAUTH_GCP_BUCKET: '{{GoogleCloudStorageBucketName}}'
+  # sendgrid api
+  SENDGRID_API_KEY: '{{SendgridApiKey}}'
+  # datastore and session variables
+  LBAUTH_APPROLEDELIM: ':'
+  LBAUTH_ACCNAMESP: 'authentication'
+  LBAUTH_KD_ACCCNF: 'useraccountconfirmation'
+  LBAUTH_KD_ACC: 'useraccount'
+  LBAUTH_KD_LOGIN: 'login'
+  # datastore auth client pool size
+  LBAUTH_CLIPOOL: '5'
+  # service run variables
+  LBAUTH_DSTYPE: 'datastore'
+  LB_DEBUGON: 'true'
+  # session signing keys location
+  KP_TYPE: 'bucket'
+  KP_GCP_BUCKET: '{{GoogleCloudStorageBucketName}}'
+  KP_PRIKEY: 'jwt.key'
+  KP_PRIKEYP: '{{PrivateKeyPassword}}'
+  KP_PUBKEY: 'jwt.key.pub'
+  # session jwt 
+  JWT_ISSUER: '{{DomainName}}'
+  JWT_EXTMIN: '15'
+  JWT_APPROLEDELIM: ':'
+  # mailer config data location
+  LBAUTH_MAILERTYPE: 'bucket'
+  LBAUTH_MAILERFILE: 'mailerdata.json'
+  # datastore storage client pool size
+  STOR_CLIPOOL: '5'
+  # whitelist vars
+  WHLST_GCP_PROJECT: '{{GoogleCloudProjectName}}'
+  WHLST_NAMESP: 'global'
+  WHLST_KD: 'whitelist'
+  # datastore whitelister client pool size
+  WHLST_CLIPOOL: '5'
+  # service vars
+  SVCAUTH_USE_WHLST: 'true'
+  SVCAUTH_CTX_TO: '30s'
+  SVCAUTH_OTP_PD: '5'
+  SVCAUTH_AUTH_HD: 'Authorization'

@@ -11,8 +11,8 @@ import (
 type lbctxkey string
 
 var (
-	//EnvAuthUseWhlst controls whether the whitelist is used
-	EnvAuthUseWhlst bool
+	//EnvAuthUseGtway controls whether the request gateway is used
+	EnvAuthUseGtway bool
 	//EnvCtxTimeout is the general context timeout
 	EnvCtxTimeout time.Duration
 	//EnvDomain is the otp domain
@@ -27,14 +27,14 @@ var (
 
 //preflight loads the config
 func preflight() {
-	//get the whitelist flag
-	usewl, err := strconv.ParseBool(os.Getenv("SVCAUTH_USE_WHLST"))
+	//get the gateway flag
+	usewl, err := strconv.ParseBool(os.Getenv("SVCAUTH_USE_GTWAY"))
 
 	if err != nil {
-		log.Fatal("Could not parse environment variable EnvAuthUseWhlst")
+		log.Fatal("Could not parse environment variable EnvAuthUseGtway")
 	}
 
-	EnvAuthUseWhlst = usewl
+	EnvAuthUseGtway = usewl
 
 	//set the context timeout
 	to, err := time.ParseDuration(os.Getenv("SVCAUTH_CTX_TO"))

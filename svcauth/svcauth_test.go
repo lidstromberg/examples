@@ -13,27 +13,27 @@ import (
 
 	auth "github.com/lidstromberg/auth"
 	lbcf "github.com/lidstromberg/config"
-	whtl "github.com/lidstromberg/whitelist"
+	gt "github.com/lidstromberg/requestgateway"
 	"golang.org/x/net/context"
 )
 
 var (
-	urlbase = "https://{{YourAppengineServiceUrl}}.appspot.com/%s"
+	urlbase = "https://auth-dot-lidstromberg-dev-002.appspot.com/%s"
 	//urlbase = "http://localhost:8080/%s"
 )
 
-func Test_SetWhitelist(t *testing.T) {
+func Test_SetGateway(t *testing.T) {
 	ctx := context.Background()
 
 	bc := lbcf.NewConfig(ctx)
 
-	wl, err := whtl.NewWhlMgr(ctx, bc)
+	gtwy, err := gt.NewGtwyMgr(ctx, bc)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = wl.Set(ctx, "::1")
+	err = gtwy.Set(ctx, "::1")
 
 	if err != nil {
 		t.Fatal(err)
@@ -814,7 +814,7 @@ func Test_ToggleTwoFAOn(t *testing.T) {
 func Test_LoginOtp(t *testing.T) {
 	url1 := fmt.Sprintf(urlbase, "auth/api/v1/global/login")
 	url2 := fmt.Sprintf(urlbase, "auth/api/v1/global/otp")
-	otpval := "670158"
+	otpval := "032966"
 
 	//create a http client
 	cli := &http.Client{}

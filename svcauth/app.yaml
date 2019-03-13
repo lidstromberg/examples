@@ -42,14 +42,14 @@ env_variables:
   LBAUTH_MAILERFILE: 'mailerdata.json'
   # datastore storage client pool size
   STOR_CLIPOOL: '5'
-  # whitelist vars
-  WHLST_GCP_PROJECT: '{{GoogleCloudProjectName}}'
-  WHLST_NAMESP: 'global'
-  WHLST_KD: 'whitelist'
-  # datastore whitelister client pool size
-  WHLST_CLIPOOL: '5'
+  # gateway vars
+  GTWAY_GCP_PROJECT: '{{GoogleCloudProjectName}}'
+  GTWAY_NAMESP: 'global'
+  GTWAY_KD: 'gateway'
+  # datastore gateway client pool size
+  GTWAY_CLIPOOL: '5'
   # service vars
-  SVCAUTH_USE_WHLST: 'true'
+  SVCAUTH_USE_GTWAY: 'true'
   SVCAUTH_CTX_TO: '30s'
   SVCAUTH_OTP_PD: '5'
   SVCAUTH_AUTH_HD: 'Authorization'

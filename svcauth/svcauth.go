@@ -10,8 +10,8 @@ import (
 	lbcf "github.com/lidstromberg/config"
 	kp "github.com/lidstromberg/keypair"
 	lblog "github.com/lidstromberg/log"
+	gt "github.com/lidstromberg/requestgateway"
 	sess "github.com/lidstromberg/session"
-	wl "github.com/lidstromberg/whitelist"
 
 	//pprof is blank import http profiler
 	_ "net/http/pprof"
@@ -27,13 +27,13 @@ type SvMgr struct {
 	bc      lbcf.ConfigSetting
 	sm      sess.SessProvider
 	cr      auth.AuthCore
-	wl      *wl.WhlMgr
+	gt      *gt.GtwyMgr
 	Mx      *mux.Router
 	appname string
 }
 
-//IsWhitelisted checks that the requester is authorised
-func (sv *SvMgr) IsWhitelisted(w http.ResponseWriter, r *http.Request, nx http.HandlerFunc) {
+//IsApproved checks that the requester is authorised
+func (sv *SvMgr) IsApproved(w http.ResponseWriter, r *http.Request, nx http.HandlerFunc) {
 	// prepare the json writer for outgoing messages
 	jswr := json.NewEncoder(w)
 
@@ -44,7 +44,7 @@ func (sv *SvMgr) IsWhitelisted(w http.ResponseWriter, r *http.Request, nx http.H
 
 	//if we can't determine who it is then forbidden
 	if len(ra) == 0 {
-		lblog.LogEvent("SvMgr", "IsWhitelisted", "error", ErrUnknownReq.Error())
+		lblog.LogEvent("SvMgr", "IsApproved", "error", ErrUnknownReq.Error())
 
 		w.WriteHeader(http.StatusForbidden)
 		if errJ := jswr.Encode(&HdlError{StatusID: http.StatusForbidden, Error: ErrUnknownReq.Error()}); errJ != nil {
@@ -53,18 +53,18 @@ func (sv *SvMgr) IsWhitelisted(w http.ResponseWriter, r *http.Request, nx http.H
 		return
 	}
 
-	//check each of the ip addresses to see if one is whitelisted
+	//check each of the ip addresses to see if one is approved
 	var chk bool
 	for _, item := range ra {
 		//log the ip
-		lblog.LogEvent("SvMgr", "IsWhitelisted", "info", item)
+		lblog.LogEvent("SvMgr", "IsApproved", "info", item)
 
-		//check if the address is whitelisted
-		chk2, err := sv.wl.IsPermitted(ctx, item)
+		//check if the address is approved
+		chk2, err := sv.gt.IsPermitted(ctx, item)
 
 		//if error then report
 		if err != nil {
-			lblog.LogEvent("SvMgr", "IsWhitelisted-IsPermitted", "error", err.Error())
+			lblog.LogEvent("SvMgr", "IsApproved-IsPermitted", "error", err.Error())
 
 			w.WriteHeader(http.StatusInternalServerError)
 			if errJ := jswr.Encode(&HdlError{StatusID: http.StatusInternalServerError, Error: err.Error()}); errJ != nil {
@@ -73,16 +73,16 @@ func (sv *SvMgr) IsWhitelisted(w http.ResponseWriter, r *http.Request, nx http.H
 			return
 		}
 
-		//if the address was whitelisted then exit
+		//if the address was approved then exit
 		if chk2 {
 			chk = chk2
 			break
 		}
 	}
 
-	//if this isn't whitelisted then return forbidden
+	//if this isn't approved then return forbidden
 	if !chk {
-		lblog.LogEvent("SvMgr", "IsWhitelisted-IsPermitted", "error", ErrForbiddenReq.Error())
+		lblog.LogEvent("SvMgr", "IsApproved-IsPermitted", "error", ErrForbiddenReq.Error())
 
 		w.WriteHeader(http.StatusForbidden)
 		if errJ := jswr.Encode(&HdlError{StatusID: http.StatusForbidden, Error: ErrForbiddenReq.Error()}); errJ != nil {
@@ -91,7 +91,7 @@ func (sv *SvMgr) IsWhitelisted(w http.ResponseWriter, r *http.Request, nx http.H
 		return
 	}
 
-	//then we continue (or we have redirected because the IP is not whitelisted)
+	//then we continue (or we have redirected because the IP is not approved)
 	nx(w, r)
 }
 
@@ -1125,15 +1125,15 @@ func NewSvMgr(ctx context.Context, appName string) (*SvMgr, error) {
 		return nil, err
 	}
 
-	//whitelist manager
-	wl, err := wl.NewWhlMgr(ctx, bc)
+	//gateway manager
+	gt, err := gt.NewGtwyMgr(ctx, bc)
 
 	if err != nil {
 		return nil, err
 	}
 
 	//create the service manager
-	rn := &SvMgr{bc: bc, sm: sm, cr: cr, wl: wl, appname: appName}
+	rn := &SvMgr{bc: bc, sm: sm, cr: cr, gt: gt, appname: appName}
 
 	//create a mux
 	mx := mux.NewRouter()
@@ -1149,7 +1149,7 @@ func NewSvMgr(ctx context.Context, appName string) (*SvMgr, error) {
 	//create the profile route and wrap it with the authorisation middleware
 	au := mux.NewRouter()
 	mx.PathPrefix("/auth/api").Handler(negroni.New(
-		negroni.HandlerFunc(rn.IsWhitelisted),
+		negroni.HandlerFunc(rn.IsApproved),
 		negroni.Wrap(au)))
 
 	//create the base app subrouter

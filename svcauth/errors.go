@@ -16,6 +16,6 @@ var (
 	ErrRqTokenEmpty = errors.New("could not obtain token from request query")
 	//ErrUnknownReq occurs when we cannot identify the requester IP
 	ErrUnknownReq = errors.New("requester IP could not be identified")
-	//ErrForbiddenReq occurs when we the requester IP is not whitelisted
+	//ErrForbiddenReq occurs when the requester IP is not approved
 	ErrForbiddenReq = errors.New("requester is not authorised")
 )

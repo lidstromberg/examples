@@ -12,6 +12,11 @@ handlers:
   redirect_http_response_code: 301
 
 env_variables:
+  # debug flags
+  LB_DEBUGON: 'true'
+  JWT_DEBUGON: 'true'
+  STOR_DEBUGON: 'true'
+  # gcp vars
   LBAUTH_GCP_PROJECT: '{{GoogleCloudProjectName}}'
   LBAUTH_GCP_BUCKET: '{{GoogleCloudStorageBucketName}}'
   # sendgrid api
@@ -26,7 +31,6 @@ env_variables:
   LBAUTH_CLIPOOL: '5'
   # service run variables
   LBAUTH_DSTYPE: 'datastore'
-  LB_DEBUGON: 'true'
   # session signing keys location
   KP_TYPE: 'bucket'
   KP_GCP_BUCKET: '{{GoogleCloudStorageBucketName}}'
